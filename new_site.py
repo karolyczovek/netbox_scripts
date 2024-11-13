@@ -54,6 +54,11 @@ class CreateSiteWithSubnetsScript(Script):
         required=False
     )
 
+    contact_role = ObjectVar(
+        description="Contact person name",
+        model=ContactRole
+    )
+
     contact_name = StringVar(
         description="Contact person name",
         required=False
@@ -82,6 +87,7 @@ class CreateSiteWithSubnetsScript(Script):
         # Auto-generate slug based on site name
         site_slug=slugify(data['site_name']),
         
+        contact_role=data['contact_role']
         contact = data['existing_contact']
         if not contact:
             # Validate new contact fields if creating a new contact
@@ -115,7 +121,8 @@ class CreateSiteWithSubnetsScript(Script):
         # Assign the contact to the site
         ContactAssignment.objects.create(
             object=site,  # Assign to the site
-            contact=contact
+            contact=contact,
+            role=contact_role
         )
         self.log_success(f"Assigned contact '{contact.name}' to site '{site.name}'")
 
