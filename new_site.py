@@ -25,7 +25,7 @@ class CreateSiteWithSubnetsScript(Script):
             ('Site contact', ('existing_contact', 'contact_role','contact_name',
                               'contact_email', 'contact_phone')),
         )
-        commit_default = False
+        commit_default = True
         scheduling_enabled = False
 
 
