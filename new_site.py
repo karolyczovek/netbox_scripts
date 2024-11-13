@@ -1,6 +1,6 @@
 from django.utils.text import slugify
 from dcim.models import Site
-from tenancy.models import Contact, ContactAssignment
+from tenancy.models import Contact, ContactAssignment, ContactRole
 
 from extras.scripts import *
 from ipam.models import VRF, Prefix
