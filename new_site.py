@@ -113,8 +113,8 @@ class CreateSiteWithSubnetsScript(Script):
         self.log_success(f"Created new site: {site}")
 
         # Assign the contact to the site
-        contact_assignment = ContactAssignment.objects.create(
-            content_object=site,  # Assign to the site
+        ContactAssignment.objects.create(
+            object=site,  # Assign to the site
             contact=contact
         )
         self.log_success(f"Assigned contact '{contact.name}' to site '{site.name}'")
