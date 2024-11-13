@@ -43,7 +43,7 @@ class CreateSiteWithSubnetsScript(Script):
     )
 
     existing_contact = ObjectVar(
-        description="Existing site contact",
+        description="Select an existing contact (leave blank to create a new contact with data below)"
         required=False,
         model=Contact
     )
@@ -55,7 +55,7 @@ class CreateSiteWithSubnetsScript(Script):
     )
 
     contact_role = ObjectVar(
-        description="Contact persons role",
+        description="Contacts person role for the site",
         model=ContactRole
     )
 
@@ -95,12 +95,17 @@ class CreateSiteWithSubnetsScript(Script):
                 self.log_failure("Name and email are required to create a new contact.")
                 return
 
-            contact = Contact.objects.create(
+            contact = Contact(
                 name=data.get('contact_name', ''),
                 phone=data.get('contact_phone', ''),
                 email=data.get('contact_email', ''),
             )
-            self.log_success(f"Created new contact: {contact.name}")
+            try:
+                contact.full_clean()
+                contact.save()
+                self.log_success(f"Created new contact: {contact.name}")
+            except ValidationError as e:
+                self.log_failure(f"Validation error in contact data: {e}")
         else:
             self.log_info(f"Using existing contact: {contact.name}")
 
