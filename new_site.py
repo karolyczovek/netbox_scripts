@@ -44,6 +44,7 @@ class CreateSiteWithSubnetsScript(Script):
 
     existing_contact = ObjectVar(
         description="Existing site contact",
+        required=False
         model=Contact
     )
     
