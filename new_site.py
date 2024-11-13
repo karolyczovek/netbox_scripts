@@ -55,7 +55,7 @@ class CreateSiteWithSubnetsScript(Script):
     )
 
     contact_role = ObjectVar(
-        description="Contact person name",
+        description="Contact persons role",
         model=ContactRole
     )
 
