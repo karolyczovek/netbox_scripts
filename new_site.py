@@ -22,7 +22,7 @@ class CreateSiteWithSubnetsScript(Script):
         fieldsets = (
             ('Site data', ('site_name', 'site_description', 'physical_address')),
             ('Site networks', ('camera_subnet', 'pos_subnet')),
-            ('Site contact', ('existing_contact', 'contact_name',
+            ('Site contact', ('existing_contact', 'contact_role','contact_name',
                               'contact_email', 'contact_phone')),
         )
         commit_default = False
