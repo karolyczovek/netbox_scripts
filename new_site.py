@@ -43,7 +43,7 @@ class CreateSiteWithSubnetsScript(Script):
     )
 
     existing_contact = ObjectVar(
-        description="Select an existing contact (leave blank to create a new contact with data below)"
+        description="Select an existing contact (leave blank to create a new contact with data below)",
         required=False,
         model=Contact
     )
