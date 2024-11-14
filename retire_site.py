@@ -23,6 +23,8 @@ class MoveDevicesAndDecommissionSite(Script):
 
     # Predefined storage site name
     STORAGE_SITE_NAME = "Storage Site"
+    DEVICE_ROLE_NAME = "Server"  # Replace with the role name you want to filter by
+
     scheduling_enabled = False
 
 
@@ -40,12 +42,13 @@ class MoveDevicesAndDecommissionSite(Script):
         if decommission_site == storage_site:
             raise ValidationError("The decommission site and storage site must be different.")
 
-        server_role = DeviceRole.objects.filter(name="server")
-        if not server_role.exists():
-            raise ValidationError("Server role to id mapping failed")
-        
+        try:
+            device_role = DeviceRole.objects.get(name=self.DEVICE_ROLE_NAME)
+        except DeviceRole.DoesNotExist:
+            raise ValidationError(f"Device role '{self.DEVICE_ROLE_NAME}' does not exist. Please check the role name.")
+
         # Get all devices from the site to be decommissioned
-        devices_to_move = Device.objects.filter(site=decommission_site,role=server_role)
+        devices_to_move = Device.objects.filter(site=decommission_site,role=device_role)
 
         if not devices_to_move.exists():
             self.log_info(f"No devices found at site '{decommission_site.name}'. Nothing to move.")
