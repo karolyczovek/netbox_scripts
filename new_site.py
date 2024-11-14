@@ -5,6 +5,7 @@ from tenancy.models import Contact, ContactAssignment, ContactRole
 from extras.scripts import *
 from ipam.models import VRF, Prefix
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
+from django.core.exceptions import ValidationError
 
 class CreateSiteWithSubnetsScript(Script):
     class Meta:
