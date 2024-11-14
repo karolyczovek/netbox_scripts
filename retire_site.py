@@ -2,6 +2,8 @@ from dcim.models import Site, Device, Rack
 from ipam.models import IPAddress
 from extras.scripts import Script, ObjectVar, BooleanVar
 from django.core.exceptions import ValidationError
+from dcim.choices import DeviceStatusChoices, SiteStatusChoices
+
 
 class MoveDevicesAndDecommissionSite(Script):
     class Meta:
@@ -53,11 +55,8 @@ class MoveDevicesAndDecommissionSite(Script):
 
         # Update the site status to Decommissioning
         try:
-            decommissioning_status = Site.objects.filter(status="Decommissioning").first()
-            if decommissioning_status is None:
-                raise ValidationError("The status 'Decommissioning' does not exist in the status choices.")
 
-            decommission_site.status = decommissioning_status
+            decommission_site.status = SiteStatusChoices.STATUS_DECOMMISSIONING
             decommission_site.save()
             self.log_success(f"Updated site status of '{decommission_site.name}' to 'Decommissioning'.")
 
