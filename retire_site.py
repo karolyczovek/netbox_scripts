@@ -1,5 +1,5 @@
 from dcim.models import Site, Device, Rack
-from ipam.models import IPAddress
+from ipam.models import IPAddress, Prefix
 from extras.scripts import Script, ObjectVar, BooleanVar
 from django.core.exceptions import ValidationError
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
@@ -23,6 +23,8 @@ class MoveDevicesAndDecommissionSite(Script):
 
     # Predefined storage site name
     STORAGE_SITE_NAME = "Storage Site"
+    scheduling_enabled = False
+
 
     def run(self, data, commit):
         decommission_site = data['decommission_site']
@@ -39,7 +41,7 @@ class MoveDevicesAndDecommissionSite(Script):
             raise ValidationError("The decommission site and storage site must be different.")
 
         # Get all devices from the site to be decommissioned
-        devices_to_move = Device.objects.filter(site=decommission_site)
+        devices_to_move = Device.objects.filter(site=decommission_site,role="server")
 
         if not devices_to_move.exists():
             self.log_info(f"No devices found at site '{decommission_site.name}'. Nothing to move.")
@@ -47,6 +49,7 @@ class MoveDevicesAndDecommissionSite(Script):
             # Move each device to the storage site
             for device in devices_to_move:
                 device.site = storage_site
+                device.status = DeviceStatusChoices.STATUS_DECOMMISSIONING
                 device.save()  # Commit the change to the database
                 self.log_success(f"Moved device '{device.name}' from '{decommission_site.name}' to '{storage_site.name}'.")
 
@@ -68,14 +71,18 @@ class MoveDevicesAndDecommissionSite(Script):
         if delete_site:
             # Cascade delete related items
             racks_to_delete = Rack.objects.filter(site=decommission_site)
-            ip_addresses_to_delete = IPAddress.objects.filter(site=decommission_site)
+            devices_to_delete = Device.objects.filter(site=decommission_site)
+            ip_prefixes_to_delete = Prefix.objects.filter(site=decommission_site)
 
             racks_deleted = racks_to_delete.count()
-            ip_addresses_deleted = ip_addresses_to_delete.count()
+            ip_prefixes_deleted = ip_prefixes_to_delete.count()
+            devices_deleted = devices_to_delete.count()
+
 
             racks_to_delete.delete()
-            ip_addresses_to_delete.delete()
+            devices_to_delete.delete()
+            ip_prefixes_to_delete.delete() 
             decommission_site.delete()
 
             # Log deletion summary
-            self.log_success(f"Deleted site '{decommission_site.name}', {racks_deleted} racks, and {ip_addresses_deleted} IP addresses.")
+            self.log_success(f"Deleted site '{decommission_site.name}', {racks_deleted} racks,  {ip_prefixes_deleted} IP addresses, { devices_deleted} devices")
