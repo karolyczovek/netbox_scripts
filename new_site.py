@@ -6,6 +6,8 @@ from extras.scripts import *
 from ipam.models import VRF, Prefix
 from dcim.choices import DeviceStatusChoices, SiteStatusChoices
 from django.core.exceptions import ValidationError
+from netaddr import IPNetwork, AddrFormatError
+
 
 class CreateSiteWithSubnetsScript(Script):
     class Meta:
@@ -75,14 +77,27 @@ class CreateSiteWithSubnetsScript(Script):
     
     # Define additional inputs for two subnets
     camera_subnet = StringVar(
-        description="Subnet for cameras (e.g., 192.168.1.0/24)",
+        description="Subnet for cameras (e.g., 192.168.1.0/24) - default prefix is /24 if unspecified",
         required=True
     )
 
     pos_subnet = StringVar(
-        description="Subnet for POS (e.g., 192.168.2.0/24)",
+        description="Subnet for POS (e.g., 192.168.2.0/24) - default prefix is /24 if unspecified",
         required=True
     )
+
+    def validate_network_prefix(self, prefix):
+        """Validate and normalize the network prefix, adding /24 if needed."""
+        try:
+            # Check if the input contains a CIDR prefix
+            if '/' not in prefix:
+                prefix += '/24'  # Automatically add /24 if no prefix is given
+            
+            # Validate the network prefix
+            network = IPNetwork(prefix)  # Will raise an error if invalid
+            return network  # Return the network if it's valid
+        except AddrFormatError:
+            raise ValidationError(f"'{prefix}' is not a valid network prefix.")
 
     def run(self, data, commit):
         # Auto-generate slug based on site name
@@ -146,20 +161,25 @@ class CreateSiteWithSubnetsScript(Script):
         # Create and assign the subnets to the site and VRF
         subnet_fields = ['camera_subnet', 'pos_subnet']
         subnets = []
+        try:
+            for i, field_name in enumerate(subnet_fields, start=1):
+                prefix = self.validate_network_prefix(data[field_name])
+                subnet = Prefix(
+                    prefix=prefix,
+                    vrf=vrf,
+                    site=site,
+                    description=f"{field_name.capitalize()} for site {site.name}"
+                    )
 
-        for i, field_name in enumerate(subnet_fields, start=1):
-            prefix = data[field_name]
-            subnet = Prefix(
-                prefix=prefix,
-                vrf=vrf,
-                site=site,
-                description=f"{field_name.capitalize()} for site {site.name}"
-            )
+                subnet.save()
+                self.log_success(f"Subnet {subnet.prefix} created and assigned to site '{site.name}'  as {field_name} in VRF '{vrf.name}'.")
 
-            subnet.save()
-            self.log_success(f"Subnet {subnet.prefix} created and assigned to site '{site.name}'  as {field_name} in VRF '{vrf.name}'.")
+                subnets.append(subnet)
 
-            subnets.append(subnet)
+        except ValidationError as e:
+        # Log failure if validation fails
+            self.log_failure(f"Validation error: {e}")
+            raise e
 
         # Assign the subnets to the site's custom fields
         if len(subnets) == 2:
