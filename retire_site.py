@@ -53,7 +53,7 @@ class MoveDevicesAndDecommissionSite(Script):
 
         # Update the site status to Decommissioning
         try:
-            decommissioning_status = Site.objects.filter(status="decommissioning").first()
+            decommissioning_status = Site.objects.filter(status="Decommissioning").first()
             if decommissioning_status is None:
                 raise ValidationError("The status 'Decommissioning' does not exist in the status choices.")
 
