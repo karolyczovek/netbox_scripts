@@ -1,4 +1,4 @@
-from dcim.models import Site, Device, Rack, Role
+from dcim.models import Site, Device, Rack, DeviceRole
 from ipam.models import IPAddress, Prefix
 from extras.scripts import Script, ObjectVar, BooleanVar
 from django.core.exceptions import ValidationError
@@ -40,7 +40,7 @@ class MoveDevicesAndDecommissionSite(Script):
         if decommission_site == storage_site:
             raise ValidationError("The decommission site and storage site must be different.")
 
-        server_role = Role.objects.filter(name="server")
+        server_role = DeviceRole.objects.filter(name="server")
         if not server_role.exist():
             raise ValidationError("Server role to id mapping failed")
         
