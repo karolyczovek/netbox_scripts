@@ -41,7 +41,7 @@ class MoveDevicesAndDecommissionSite(Script):
             raise ValidationError("The decommission site and storage site must be different.")
 
         server_role = DeviceRole.objects.filter(name="server")
-        if not server_role.exist():
+        if not server_role.exists():
             raise ValidationError("Server role to id mapping failed")
         
         # Get all devices from the site to be decommissioned
