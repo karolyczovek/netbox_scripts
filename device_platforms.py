@@ -6,11 +6,11 @@ from requests.auth import HTTPBasicAuth
 from django.conf import settings
 import requests
 from datetime import datetime
+from netbox.plugins import get_plugin_config
 
 
-class CartwatchVersionsScript(Script):
+class DocumentCartwatchVersions(Script):
     class Meta:
-        name = "Cartwatch Versions"
         description = "Displays all servers with their Cartwatch and Cartwatch_Admin versions"
 
     update_confluence_page = BooleanVar(
@@ -20,17 +20,19 @@ class CartwatchVersionsScript(Script):
 
     def update_confluence(self, data, article_body):
         if data.get('update_confluence_page'):
-            confluence_config = getattr(settings, 'PLUGINS_CONFIG', {}).get(
-                'netbox_confluence_kb', {})
+            self.log_info("Updating Confluence page")
 
-            CONFLUENCE_INSTANCE = confluence_config.get(
-                'confluence_cloud_instance')
-            CONFLUENCE_API_TOKEN = confluence_config.get(
-                'token')
-            CONFLUENCE_USER = confluence_config.get(
-                'confluence_user')
+            CONFLUENCE_INSTANCE = get_plugin_config(
+                'netbox_confluence_kb', 'confluence_cloud_instance')
+            CONFLUENCE_USER = get_plugin_config(
+                'netbox_confluence_kb', 'confluence_user')
+            CONFLUENCE_API_TOKEN = get_plugin_config(
+                'netbox_confluence_kb', 'confluence_token')
 
-            CONFLUENCE_AUTH = HTTPBasicAuth(CONFLUENCE_USER, CONFLUENCE_API_TOKEN)
+            CONFLUENCE_AUTH = HTTPBasicAuth(
+                    CONFLUENCE_USER,
+                    CONFLUENCE_API_TOKEN
+                )
 
             CONFLUENCE_URL = f"https://{CONFLUENCE_INSTANCE}.atlassian.net/wiki/rest/api/content"
             CONFLUENCE_PAGE_ID = "3261431823"
@@ -82,34 +84,58 @@ class CartwatchVersionsScript(Script):
 
             except requests.exceptions.RequestException as e:
                 self.log_failure(f"Failed to update Confluence page: {str(e)}")
-        else:
-            self.log_warning("Confluence configuration not found in settings")
 
     def run(self, data, commit):
         output = []
         server_role = DeviceRole.objects.get(name='server')
 
         html = '<table class="table"><thead><tr>'
-        headers = ['Device', 'Platform', 'Cartwatch', 'Cartwatch Admin']
+        headers = ['Device',
+                   'Platform',
+                   'Site',
+                   'Cartwatch',
+                   'Cartwatch Admin',
+                   'Last Updated'
+                   ]
+
         for header in headers:
             html += f'<th>{header}</th>'
         html += '</tr></thead><tbody>'
 
         for device in Device.objects.filter(
-            status=DeviceStatusChoices.STATUS_ACTIVE,
+            status__in=[
+                DeviceStatusChoices.STATUS_ACTIVE,
+                'In testing',
+                DeviceStatusChoices.STATUS_PLANNED,
+                'contract-cancelled',
+            ],
             tags__name='cartwatch',
             role=server_role
-        ):
-            # Change the naming standard based on the re.match
-            ol = f"{device.name} on {device.platform.name if device.platform else 'N/A'} deployed at {device.site.name} with cartwatch {device.custom_field_data.get('cartwatch_version', 'N/A')} and cartwatch_admin {device.custom_field_data.get('cartwatch_admin_version', 'N/A')}"
+        ).order_by('name'):
+
+            ol = (
+                f"{device.name} on "
+                f"{device.platform.name if device.platform else 'N/A'} "
+                f"deployed at {device.site.name} with cartwatch "
+                f"{device.custom_field_data.get('cartwatch_version', 'N/A')} "
+                f"and cartwatch_admin "
+                f"{device.custom_field_data.get('cartwatch_admin_version', 'N/A')}"
+            )
 
             html += f'<tr><td>{device.name}</td>'
             html += f'<td>{device.platform.name if device.platform else "N/A"}</td>'
-            html += f'<td>{device.custom_field_data.get("cartwatch_version", "N/A")}</td>'
-            html += f'<td>{device.custom_field_data.get("cartwatch_admin_version", "N/A")}</td></tr>'
+            html += f'<td>{device.site.name}</td>'
+
+            html += f'<td>{device.custom_field_data.get(
+                "cartwatch_version", "N/A")}</td>'
+
+            html += f'<td>{device.custom_field_data.get(
+                "cartwatch_admin_version", "N/A")}</td>'
+
+            html += f'<td>{device.custom_field_data.get(
+                "cartwatch_last_updated", "N/A")}</td></tr>'
 
             output.append(ol)
-            # self.log_success(ol)
 
         html += '</tbody></table>'
         self.update_confluence(data, article_body=html)
