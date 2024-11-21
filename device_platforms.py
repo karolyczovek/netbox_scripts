@@ -8,19 +8,19 @@ class CartwatchVersionsScript(Script):
         description = "Displays all servers with their Cartwatch and Cartwatch Admin versions"
 
     def run(self, data, commit):
-        output = []
+        html = '<table class="table"><thead><tr>'
+        headers = ['Device', 'Platform', 'Cartwatch', 'Cartwatch Admin']
+        for header in headers:
+            html += f'<th>{header}</th>'
+        html += '</tr></thead><tbody>'
         
         for device in Device.objects.filter(tags__name='Server'):
-            output.append([
-                device.name,
-                device.platform.name if device.platform else 'N/A',
-                device.custom_field_data.get('cartwatch_version', 'N/A'),
-                device.custom_field_data.get('cartwatch_admin_version', 'N/A')
-            ])
-
-        self._log(
-            message="Device Versions",
-            headers=['Device', 'Platform', 'Cartwatch Version', 'Cartwatch Admin Version'],
-            data=output
-        )
+            html += f'<tr><td>{device.name}</td>'
+            html += f'<td>{device.platform.name if device.platform else "N/A"}</td>'
+            html += f'<td>{device.custom_field_data.get("cartwatch_version", "N/A")}</td>'
+            html += f'<td>{device.custom_field_data.get("cartwatch_admin_version", "N/A")}</td></tr>'
+        
+        html += '</tbody></table>'
+        
+        return format_html(html)
 
