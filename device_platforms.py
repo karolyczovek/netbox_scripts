@@ -18,7 +18,7 @@ class CartwatchVersionsScript(Script):
                 device.custom_field_data.get('cartwatch_admin_version', 'N/A')
             ])
 
-        self.log(
+        self._log(
             "Device Versions",
             obj=None,
             grouping="Results",
