@@ -8,7 +8,6 @@ import requests
 from datetime import datetime
 
 
-
 class CartwatchVersionsScript(Script):
     class Meta:
         name = "Cartwatch Versions"
@@ -20,7 +19,7 @@ class CartwatchVersionsScript(Script):
     )
 
     def update_confluence(self, data, article_body):
-        if data.update_confluence_page:
+        if data.get('update_confluence_page'):
             confluence_config = getattr(settings, 'PLUGINS_CONFIG', {}).get(
                 'netbox_confluence_kb', {})
 
