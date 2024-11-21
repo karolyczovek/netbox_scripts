@@ -11,20 +11,18 @@ class CartwatchVersionsScript(Script):
         output = []
         
         for device in Device.objects.filter(tags__name='Server'):
-            output.append({
-                'device': device.name,
-                'platform': device.platform.name if device.platform else 'N/A',
-                'cartwatch_version': device.custom_field_data.get('cartwatch_version', 'N/A'),
-                'cartwatch_admin_version': device.custom_field_data.get('cartwatch_admin_version', 'N/A')
-            })
+            output.append([
+                device.name,
+                device.platform.name if device.platform else 'N/A',
+                device.custom_field_data.get('cartwatch_version', 'N/A'),
+                device.custom_field_data.get('cartwatch_admin_version', 'N/A')
+            ])
 
-        self.log_table(
-            output,
-            headers={
-                'device': 'Device',
-                'platform': 'Platform',
-                'cartwatch_version': 'Cartwatch Version',
-                'cartwatch_admin_version': 'Cartwatch Admin Version'
-            }
+        self.log(
+            "Device Versions",
+            obj=None,
+            grouping="Results",
+            headers=['Device', 'Platform', 'Cartwatch Version', 'Cartwatch Admin Version'],
+            data=output
         )
 
