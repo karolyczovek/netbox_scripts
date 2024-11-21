@@ -15,6 +15,7 @@ class CartwatchVersionsScript(Script):
 
         for device in Device.objects.filter(
             status=DeviceStatusChoices.STATUS_ACTIVE,
+            tags__name='cartwatch',
             role=server_role
         ):
             # Change the naming standard based on the re.match
