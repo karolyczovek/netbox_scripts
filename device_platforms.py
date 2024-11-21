@@ -10,6 +10,9 @@ class CartwatchVersionsScript(Script):
         description = "Displays all servers with their Cartwatch and Cartwatch Admin versions"
 
     def run(self, data, commit):
-        for device in Device.objects.filter(status=DeviceStatusChoices.STATUS_ACTIVE):
+        output = []
+        for device in Device.objects.filter(status=DeviceStatusChoices.STATUS_ACTIVE, role__name='Server'):
             # Change the naming standard based on the re.match
-            self.log_success(f"{device.name} {device.platform.name if device.platform else 'N/A'} {device.custom_field_data.get('cartwatch_version', 'N/A')} {device.custom_field_data.get('cartwatch_admin_version', 'N/A')}")
+            output.append(f"{device.name} on {device.platform.name if device.platform else 'N/A'} deployed cartwatch {device.custom_field_data.get('cartwatch_version', 'N/A')} and cartwatch_admin {device.custom_field_data.get('cartwatch_admin_version', 'N/A')}")
+
+        return '\n'.join(output)
