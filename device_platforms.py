@@ -19,9 +19,7 @@ class CartwatchVersionsScript(Script):
             ])
 
         self._log(
-            "Device Versions",
-            obj=None,
-            grouping="Results",
+            message="Device Versions",
             headers=['Device', 'Platform', 'Cartwatch Version', 'Cartwatch Admin Version'],
             data=output
         )
