@@ -13,7 +13,7 @@ class CartwatchVersionsScript(Script):
         output = []
         for device in Device.objects.filter(
             status=DeviceStatusChoices.STATUS_ACTIVE,
-            device_role__name='Server'
+            role='server'
         ):
             # Change the naming standard based on the re.match
             ol = f"{device.name} on {device.platform.name if device.platform else 'N/A'} deployed cartwatch {device.custom_field_data.get('cartwatch_version', 'N/A')} and cartwatch_admin {device.custom_field_data.get('cartwatch_admin_version', 'N/A')}"
