@@ -36,7 +36,7 @@ class CartwatchVersionsScript(Script):
             CONFLUENCE_PAGE_ID = "3261431823"
 
             if not CONFLUENCE_URL or not CONFLUENCE_API_TOKEN:
-                self.log_error("Confluence URL or token not found in settings")
+                self.log_warning("Confluence URL or token not found in settings")
                 return
 
             headers = {
@@ -81,9 +81,9 @@ class CartwatchVersionsScript(Script):
                 self.log_success("Successfully updated Confluence page")
 
             except requests.exceptions.RequestException as e:
-                self.log_error(f"Failed to update Confluence page: {str(e)}")
+                self.log_failure(f"Failed to update Confluence page: {str(e)}")
         else:
-            self.log_error("Confluence configuration not found in settings")
+            self.log_warning("Confluence configuration not found in settings")
 
     def run(self, data, commit):
         output = []
