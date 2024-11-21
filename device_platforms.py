@@ -11,8 +11,10 @@ class CartwatchVersionsScript(Script):
 
     def run(self, data, commit):
         output = []
-        for device in Device.objects.filter(status=DeviceStatusChoices.STATUS_ACTIVE, role__name='Server'):
+        for device in Device.objects.filter(status=DeviceStatusChoices.STATUS_ACTIVE):
             # Change the naming standard based on the re.match
-            output.append(f"{device.name} on {device.platform.name if device.platform else 'N/A'} deployed cartwatch {device.custom_field_data.get('cartwatch_version', 'N/A')} and cartwatch_admin {device.custom_field_data.get('cartwatch_admin_version', 'N/A')}")
+            ol = f"{device.name} on {device.platform.name if device.platform else 'N/A'} deployed cartwatch {device.custom_field_data.get('cartwatch_version', 'N/A')} and cartwatch_admin {device.custom_field_data.get('cartwatch_admin_version', 'N/A')}"
+            output.append(ol)
+            self.log_success(ol)
 
         return '\n'.join(output)
