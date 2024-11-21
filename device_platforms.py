@@ -113,6 +113,6 @@ class CartwatchVersionsScript(Script):
             # self.log_success(ol)
 
         html += '</tbody></table>'
-        self.update_confluence(article_body=html)
+        self.update_confluence(data, article_body=html)
 
         return '\n'.join(output)
