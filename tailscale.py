@@ -46,7 +46,8 @@ class TailscaleStatusSync(Script):
             # Update NetBox devices with active status
             devices_updated = 0
             for device in Device.objects.filter(
-                tags__name='tailscale',
+                tags__name__in=['tailscale'],
+                role__name__in=['server'],
                 status__in=[
                     DeviceStatusChoices.STATUS_ACTIVE,
                     DeviceStatusChoices.STATUS_PLANNED,
