@@ -40,7 +40,7 @@ class TailscaleStatusSync(Script):
                 # Consider a node online if it was seen in the last 10 minutes
                 last_seen = datetime.fromisoformat(node['lastSeen'].replace('Z', '+00:00'))
                 is_online = (datetime.now(timezone.utc) - last_seen).total_seconds() < 600  # 10 minutes
-                self.log_debug(f"Tailscale node {hostname} is online: {is_online}")
+                #self.log_debug(f"Tailscale node {hostname} is online: {is_online}")
                 node_status[hostname] = is_online
 
             # Update NetBox devices with active status
@@ -50,12 +50,11 @@ class TailscaleStatusSync(Script):
                 status__in=[DeviceStatusChoices.STATUS_ACTIVE]
             ):
                 hostname = device.name.lower()
-                self.log_debug(f"NetBox device {hostname} is online: {hostname in node_status}")
                 if hostname in node_status:
-                    self.log_debug("Netbox and Tailscale nodes match")
                     is_online = node_status[hostname]
+                    self.log_debug(f"NetBox device {hostname} is online: {is_online} - netbox: {device.status}")
                     new_status = (
-                        DeviceStatusChoices.STATUS_ACTIVE if is_online 
+                        DeviceStatusChoices.STATUS_ACTIVE if is_online
                         else DeviceStatusChoices.STATUS_OFFLINE
                     )
 
