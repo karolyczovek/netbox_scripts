@@ -51,14 +51,13 @@ class TailscaleStatusSync(Script):
                     DeviceStatusChoices.STATUS_ACTIVE,
                     DeviceStatusChoices.STATUS_PLANNED,
                     DeviceStatusChoices.STATUS_OFFLINE,
-                    'contract-cancelled',
                     'testing'
                 ]
             ):
                 hostname = device.name.lower()
                 if hostname in node_status:
                     is_online = node_status[hostname]
-                    self.log_debug(f"NetBox device {hostname} is online: {is_online} - netbox: {device.status}")
+                    #self.log_debug(f"NetBox device {hostname} is online: {is_online} - netbox: {device.status}")
                     new_status = (
                         DeviceStatusChoices.STATUS_ACTIVE if is_online
                         else DeviceStatusChoices.STATUS_OFFLINE
