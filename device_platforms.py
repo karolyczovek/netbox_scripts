@@ -105,9 +105,9 @@ class DocumentCartwatchVersions(Script):
         for device in Device.objects.filter(
             status__in=[
                 DeviceStatusChoices.STATUS_ACTIVE,
-                'In testing',
                 DeviceStatusChoices.STATUS_PLANNED,
                 'contract-cancelled',
+                'testing',
             ],
             tags__name='cartwatch',
             role=server_role
