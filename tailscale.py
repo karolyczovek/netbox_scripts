@@ -52,7 +52,6 @@ class TailscaleStatusSync(Script):
                     DeviceStatusChoices.STATUS_ACTIVE,
                     DeviceStatusChoices.STATUS_PLANNED,
                     DeviceStatusChoices.STATUS_OFFLINE,
-                    'testing'
                 ]
             ):
                 hostname = device.name.lower()
