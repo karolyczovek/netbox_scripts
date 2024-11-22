@@ -47,7 +47,13 @@ class TailscaleStatusSync(Script):
             devices_updated = 0
             for device in Device.objects.filter(
                 tags__name='tailscale',
-                status__in=[DeviceStatusChoices.STATUS_ACTIVE]
+                status__in=[
+                    DeviceStatusChoices.STATUS_ACTIVE,
+                    DeviceStatusChoices.STATUS_PLANNED,
+                    DeviceStatusChoices.STATUS_OFFLINE,
+                    'contract-cancelled',
+                    'testing'
+                ]
             ):
                 hostname = device.name.lower()
                 if hostname in node_status:
