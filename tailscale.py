@@ -3,7 +3,7 @@ from dcim.models import Device
 from dcim.choices import DeviceStatusChoices
 from django.conf import settings
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
 
 class TailscaleStatusSync(Script):
     class Meta:
@@ -33,10 +33,14 @@ class TailscaleStatusSync(Script):
             tailscale_nodes = response.json().get('devices', [])
 
             # Create a map of hostname to online status
-            node_status = {
-                node['hostname']: node['online']
-                for node in tailscale_nodes
-            }
+            node_status = {}
+            for node in tailscale_nodes:
+                # Convert to lowercase to match device names
+                hostname = node['hostname'].lower()
+                # Consider a node online if it was seen in the last 10 minutes
+                last_seen = datetime.fromisoformat(node['lastSeen'].replace('Z', '+00:00'))
+                is_online = (datetime.now(timezone.utc) - last_seen).total_seconds() < 600  # 10 minutes
+                node_status[hostname] = is_online
 
             # Update NetBox devices with active status
             devices_updated = 0
