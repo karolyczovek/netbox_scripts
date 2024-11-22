@@ -35,8 +35,8 @@ class TailscaleStatusSync(Script):
             # Create a map of hostname to online status
             node_status = {}
             for node in tailscale_nodes:
-                # Convert to lowercase to match device names
-                hostname = node['hostname'].lower()
+                # Remove tailnet suffix and convert to lowercase
+                hostname = node['hostname'].split('.')[0].lower()
                 # Consider a node online if it was seen in the last 10 minutes
                 last_seen = datetime.fromisoformat(node['lastSeen'].replace('Z', '+00:00'))
                 is_online = (datetime.now(timezone.utc) - last_seen).total_seconds() < 600  # 10 minutes
