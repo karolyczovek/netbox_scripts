@@ -111,7 +111,7 @@ class DocumentCartwatchVersions(Script):
             ],
             tags__name='cartwatch',
             role=server_role
-        ).order_by('_name'):
+        ).order_by('name'):
 
             ol = (
                 f"{device.name} on "
